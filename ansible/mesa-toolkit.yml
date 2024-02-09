@@ -1,0 +1,53 @@
+- name: Install MESA Tools
+  shell: |
+    cd {{ vm_tools_source_dir }}/github.com/cisagov/mesa-toolkit
+    chmod +x MESA-install-tools.sh
+    ./MESA-install-tools.sh -{{ system_platform }}
+  become: yes
+
+- name: Fix Ownership of Virtual Environment
+  file:
+    path: "/opt/MESA-venv"
+    owner: "{{ vm_username }}"
+    group: "{{ vm_username }}"
+    recurse: yes
+  become: yes
+
+- name: MESA Gui
+  shell: |
+    . /opt/MESA-venv/bin/activate
+    cd {{ vm_tools_source_dir }}/github.com/cisagov/mesa-gui
+    pip install .
+    pip install colorama # TODO: TEMP FIX
+    cd mesa_gui
+    python manage.py migrate
+    python manage.py loaddata mesa/fixtures/mesajobs.json
+    export DJANGO_SUPERUSER_PASSWORD={{ mesa_user_password }}
+    export DJANGO_SUPERUSER_EMAIL=vulnerability@cisa.dhs.gov
+    python manage.py createsuperuser --username {{ mesa_user_name }} --no-input
+
+- name: Disable DEBUG Mode
+  lineinfile:
+    path: "{{ vm_tools_source_dir }}/github.com/cisagov/mesa-gui/mesa_gui/mesa_gui/settings.py"
+    regexp: '^DEBUG ='
+    line: 'DEBUG = False'
+
+- name: Allow for all hosts
+  lineinfile:
+    path: "{{ vm_tools_source_dir }}/github.com/cisagov/mesa-gui/mesa_gui/mesa_gui/settings.py"
+    regexp: '^ALLOWED_HOSTS ='
+    line: 'ALLOWED_HOSTS = ["*"]'
+
+- name: Install MESA-Gui as a Service
+  template:
+    src: mesa.service.j2
+    dest: /etc/systemd/system/mesa.service
+  become: yes
+
+- name: Reload mesa
+  systemd:
+    daemon_reload: yes
+    name: mesa
+    state: restarted
+    enabled: yes
+  become: yes

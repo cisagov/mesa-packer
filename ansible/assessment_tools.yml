@@ -1,0 +1,165 @@
+---
+
+- hosts: all
+  name : Install assessment tools
+  become: no
+  become_method: sudo
+  vars:
+    vm_tools_source_dir: "{{ [vm_tools_dir, 'src'] | path_join }}"
+    vm_hostname: "mesa-ops"
+    vm_username: "mesa"
+    system_platform: "vm"
+    repositories:
+      # Git Only
+      - name: "MESA-Toolkit"
+        repo: "github.com/cisagov/mesa-toolkit"
+        version: "feature/add-report-generator"
+        # Get access token from vault and pass to git module
+        git_user: "{{ lookup('env', 'GIT_USER') }}"
+        git_token: "{{ lookup('env', 'GIT_PAT') }}"
+        force: yes
+
+      - name: "MESA-GUI"
+        repo: "github.com/cisagov/mesa-gui"
+        version: "feature/add-report-generator"
+        git_user: "{{ lookup('env', 'GIT_USER') }}"
+        git_token: "{{ lookup('env', 'GIT_PAT') }}"
+        force: yes
+
+    # Apt package list
+    # packages:
+      # - nmap
+      # - 7zip
+      # - zip
+      # - unzip
+      # - tar
+      # - ufw
+      # - neo4j
+      # - python3.11-venv
+      # - chromium
+      # - jq
+      # - golang-go
+
+  tasks:
+
+    - name: Update hosts file
+      become: yes
+      lineinfile:
+        dest: /etc/hosts
+        line: '127.0.1.1  {{ vm_hostname }}'
+
+    - name: Update hostname
+      become: yes
+      hostname:
+        name: "{{ vm_hostname }}"
+
+    - name: Reboot
+      reboot:
+        msg: "Reboot initiated by Ansible for hostname change"
+        connect_timeout: 5
+        reboot_timeout: 300
+        pre_reboot_delay: 0
+        post_reboot_delay: 30
+      become: yes
+      become_method: sudo
+      when: ansible_hostname != vm_hostname
+
+    # Baseline tasks
+    - name: Update APT Repo
+      become: yes
+      apt:
+        update_cache: yes
+
+    - name: Install Python 3 packages
+      become: yes
+      package:
+        name:
+          - python3
+          - python3-pip
+          - python3-venv
+        state: present
+
+    - include_tasks: ./apt.yml
+      loop: "{{ packages }}"
+      when:
+        - packages is defined
+        - packages | length > 0
+
+    - name: Update PATH
+      become: yes
+      lineinfile:
+        dest: /etc/zsh/zshrc
+        line: 'export PATH=$PATH:/usr/local/go/bin:/home/{{ vm_username }}/.local/bin:$HOME/go/bin'
+
+    # Tools directory setup
+    - name: Create Tools Directory
+      become: yes
+      file:
+        path: "{{ vm_tools_dir }}"
+        owner: "{{ vm_username }}"
+        group: "{{ vm_username }}"
+        state: directory
+        mode: 0755
+
+    - name: Create Tools Source Directory
+      become: yes
+      file:
+        path: "{{ vm_tools_source_dir }}"
+        owner: "{{ vm_username }}"
+        group: "{{ vm_username }}"
+        state: directory
+        mode: 0755
+
+    - name: Create User Local Bin Directory
+      file:
+        path: "/home/{{ vm_username }}/.local/bin"
+        owner: "{{ vm_username }}"
+        group: "{{ vm_username }}"
+        state: directory
+        mode: 0755
+
+    - name: Create Bash Log Directory
+      become: yes
+      file:
+        path: "/opt/op-log"
+        owner: "{{ vm_username }}"
+        group: "{{ vm_username }}"
+        state: directory
+        mode: 0755
+
+    # Clone repositories and link to tools directory
+    - include_tasks: git-clone.yml
+      loop: "{{ repositories }}"
+
+    - name: Link Tool Repos to Tool Directory
+      file:
+        src: "{{ vm_tools_source_dir }}/{{ item.repo }}"
+        dest: "{{ vm_tools_dir }}/{{ item.name }}"
+        state: link
+      with_items: "{{ repositories }}"
+
+    - name: Install MESA Tools
+      include_tasks: ./mesa-toolkit.yml
+
+    - name: Set ZSH for User
+      become: yes
+      ansible.builtin.user:
+        name: "{{ vm_username }}"
+        shell: "/bin/zsh"
+
+    # Enable Kali Logging
+    - name: Enable Kali Logging
+      shell: |
+        sudo mkdir -p /opt/op-log
+        sudo chown -R ${vm_username}:${vm_username} /opt/op-log
+
+        # This base64 blob decodes as follows:
+        echo test "$(ps -ocommand= -p $PPID | awk '{print $1}')" == 'script' || (script -f /opt/op-log/$(date +"%Y-%m-%d_%H-%M-%S")_shell.log)
+        # export PS1="[\$(date +\"%Y-%m-%d %H:%M:%S\")]"$'\n'"$PS1"
+        # set -o vi
+
+        echo "bWtkaXIgLXAgL29wdC9vcC1sb2cKdGVzdCAiJChwcyAtb2NvbW1hbmQ9IC1wICRQUElEIHwgYXdrICd7cHJpbnQgJDF9JykiID09ICdzY3JpcHQnIHx8IChzY3JpcHQgLWYgL29wdC9vcC1sb2cvJChkYXRlICsiJVktJW0tJWRfJUgtJU0tJVMiKV9zaGVsbC5sb2cpCmV4cG9ydCBQUzE9IltcJChkYXRlICtcIiVZLSVtLSVkICVIOiVNOiVTXCIpXSIkJ1xuJyIkUFMxIgpzZXQgLW8gdmkK" |base64 -d >>  ~/.zshrc
+
+        echo "termcapinfo xterm* ti@:te@" >> ~/.screenrc
+      args:
+        creates: "/opt/op-log/"

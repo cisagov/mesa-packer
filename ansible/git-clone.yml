@@ -1,0 +1,16 @@
+- name: Clone Tool Repos - {{ item.name }}
+  git:
+    repo: "https://{{ (item.git_user + ':' if item.git_user is defined else '') }}{{ (item.git_token + '@' if item.git_token is defined else '') }}{{ item.repo }}"
+    version: "{{ item.version | default(omit) }}"
+    depth: 1
+    dest: "{{ vm_tools_source_dir }}/{{ item.repo }}"
+    force: "{{ item.force | default(false) }}"
+  when: item.repo is defined and item.repo
+
+- name: Cleanup - {{ item.name }}
+  lineinfile:
+    state: present
+    path: "{{ vm_tools_source_dir }}/{{ item.repo }}/.git/config"
+    regexp: "url = https:\/\/.*:.*@"
+    line: "url = https://{{ item.repo }}"
+  when: item.git_token is defined and item.git_token

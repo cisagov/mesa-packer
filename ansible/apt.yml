@@ -1,0 +1,12 @@
+- name: Install APT tools - {{ item }}
+  become: yes
+  package:
+    name: "{{ item }}"
+    state: present
+
+- name: Install APT Tool Dependencies - {{ item }}
+  become: yes
+  package:
+    name: "{{ item.package_dependencies }}"
+    state: present
+  when: item.package_dependencies is defined and item.package_dependencies
