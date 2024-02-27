@@ -13,7 +13,7 @@
       # Git Only
       - name: "MESA-Toolkit"
         repo: "github.com/cisagov/mesa-toolkit"
-        version: "feature/add-report-generator"
+        version: "main"
         # Get access token from vault and pass to git module
         git_user: "{{ lookup('env', 'GIT_USER') }}"
         git_token: "{{ lookup('env', 'GIT_PAT') }}"
@@ -21,7 +21,7 @@
 
       - name: "MESA-GUI"
         repo: "github.com/cisagov/mesa-gui"
-        version: "feature/add-report-generator"
+        version: "develop"
         git_user: "{{ lookup('env', 'GIT_USER') }}"
         git_token: "{{ lookup('env', 'GIT_PAT') }}"
         force: yes
