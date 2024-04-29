@@ -1,8 +1,8 @@
 - name: Install MESA Tools
   shell: |
     cd {{ vm_tools_source_dir }}/github.com/cisagov/mesa-toolkit
-    chmod +x MESA-install-tools.sh
-    ./MESA-install-tools.sh -{{ system_platform }}
+    chmod +x mesa-install-tools.sh
+    ./mesa-install-tools.sh -{{ system_platform }}
   become: yes
 
 - name: Fix Ownership of Virtual Environment
