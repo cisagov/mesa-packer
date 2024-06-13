@@ -20,6 +20,7 @@
     pip install .
     pip install colorama # TODO: TEMP FIX
     cd mesa_gui
+    openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes -subj "/C=/ST=/L=/O=/OU=/CN=" # Creates self-signed SSL cert
     python manage.py migrate
     python manage.py loaddata mesa/fixtures/mesajobs.json
     export DJANGO_SUPERUSER_PASSWORD={{ mesa_user_password }}
