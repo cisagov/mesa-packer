@@ -1,3 +1,24 @@
+"""MacOS Set Up"""
+
+# set up folder organization in ~ dircorty
+mkdir 'folder name'
+cd 'folder name'
+
+# switch terminal from zsh to bash 
+bash
+
+# initail setup 
+brew tap hashicorp/tap
+brew install hashicorp/tap/packer
+brew upgrade hashicorp/tap/packer
+brew install pipx
+pipx ensurepath
+pipx install --include-deps ansible
+
+git clone https://github.com/cisagov/mesa-packer.git
+
+cd mesa-packer
+
 ```bash
 /bin/bash
 # set up necessary environment variables

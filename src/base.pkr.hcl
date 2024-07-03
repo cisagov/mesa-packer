@@ -58,8 +58,8 @@ variable "output_directory" {
 }
 
 source "vmware-iso" "base-kali" {
-  iso_url = "https://cdimage.kali.org/current/kali-linux-2024.1-installer-amd64.iso"
-  iso_checksum = "file:https://cdimage.kali.org/current/SHA256SUMS"
+  iso_url = "https://cdimage.kali.org/current/kali-linux-2024.2-installer-amd64.iso"
+  iso_checksum= "file:https://cdimage.kali.org/current/SHA256SUMS"
   shutdown_command = "echo '${var.vm_password}' | sudo -S shutdown -P now"
   output_directory = "${var.output_directory}"
 
