@@ -49,7 +49,7 @@ variable "mesa_user_password" {
 variable "source_path" {
   type        = string
   description = "Source template for VM"
-  default    = "${ env("HOME") }/Virtual Machines.localized/base-kali/base-kali.vmx"
+  default    = "${ env("HOME") }/Virtual Machines.localized/base-deb/base-deb.vmx"
 }
 
 variable "vm_tools_dir" {
