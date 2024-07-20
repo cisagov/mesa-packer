@@ -17,8 +17,9 @@ d-i pkgsel/include string openssh-server zsh git
 # start ssh on boot and add user to sudoers nopasswd
 d-i preseed/late_command string \
   in-target update-rc.d ssh enable ; \
-  echo "%${username} ALL=(ALL:ALL) NOPASSWD:ALL" > /target/etc/sudoers.d/${username} && chmod 0440 /target/etc/sudoers.d/${username}
-  in-target chsh -s /usr/bin/zsh ${username};
+  echo "%${username} ALL=(ALL:ALL) NOPASSWD:ALL" > /target/etc/sudoers.d/${username} && chmod 0440 /target/etc/sudoers.d/${username} ; \
+  echo 'export PATH=$PATH:/usr/local/bin' > /target/home/${username}/.zshrc ; \
+  in-target chsh -s /usr/bin/zsh ${username}
 
 # Region Information
 d-i time/zone string US/Eastern
