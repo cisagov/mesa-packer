@@ -1,4 +1,4 @@
- packer {
+packer {
   required_version = ">= 1.8.6"
   required_plugins {
     vmware = {
@@ -30,7 +30,7 @@ variable "vm_password" {
 variable "vm_hostname" {
   type          = string
   description   = "Hostname of VM"
-  default       = "base-kali"
+  default       = "base-deb"
 }
 
 variable "vm_domain" {
@@ -54,12 +54,12 @@ variable "preseed_file" {
 variable "output_directory" {
   type        = string
   description = "Output directory for Packer"
-  default     = "${ env("HOME") }/Virtual Machines.localized/base-kali"
+  default     = "${ env("HOME") }/Virtual Machines.localized/base-deb"
 }
 
-source "vmware-iso" "base-kali" {
-  iso_url = "https://cdimage.kali.org/current/kali-linux-2024.1-installer-amd64.iso"
-  iso_checksum = "file:https://cdimage.kali.org/current/SHA256SUMS"
+source "vmware-iso" "base-deb" {
+  iso_url = "https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-12.6.0-amd64-netinst.iso"
+  iso_checksum = "file:https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/SHA256SUMS"
   shutdown_command = "echo '${var.vm_password}' | sudo -S shutdown -P now"
   output_directory = "${var.output_directory}"
 
@@ -117,6 +117,6 @@ source "vmware-iso" "base-kali" {
 }
 
 build {
-  name = "base-kali"
-  sources = ["source.vmware-iso.base-kali"]
+  name = "base-deb"
+  sources = ["source.vmware-iso.base-deb"]
 }
