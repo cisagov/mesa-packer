@@ -4,8 +4,8 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/bin/bash -c '. /opt/MESA-venv/bin/activate && python manage.py runsslserver --certificate cert.pem --key key.pem 0.0.0.0:8080'
-ExecStop=/bin/bash -c 'pkill -f "python manage.py runsslserver"'
+ExecStart=/bin/bash -c '. /opt/MESA-venv/bin/activate && gunicorn --bind 127.0.0.1:8000 mesa_gui.wsgi:application'
+ExecStop=/bin/bash -c 'pkill -f "gunicorn --bind 127.0.0.1:8000 mesa_gui.wsgi:application"'
 WorkingDirectory={{ vm_tools_source_dir }}/github.com/cisagov/mesa-gui/mesa_gui/
 
 [Install]

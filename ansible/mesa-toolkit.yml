@@ -19,6 +19,7 @@
     cd {{ vm_tools_source_dir }}/github.com/cisagov/mesa-gui
     pip install .
     pip install colorama # TODO: TEMP FIX
+    pip install gunicorn
     cd mesa_gui
     openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes -subj "/C=/ST=/L=/O=/OU=/CN=" # Creates self-signed SSL cert
     python manage.py migrate
@@ -38,6 +39,22 @@
     path: "{{ vm_tools_source_dir }}/github.com/cisagov/mesa-gui/mesa_gui/mesa_gui/settings.py"
     regexp: '^ALLOWED_HOSTS ='
     line: 'ALLOWED_HOSTS = ["*"]'
+
+- name: Install nginx
+  become: yes
+  apt:
+    name: nginx
+    state: latest
+    update_cache: yes
+
+- name: Copy nginx config file
+  become: yes
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/sites-enabled/default
+    owner: root
+    group: root
+    mode: 0644
 
 - name: Install MESA-Gui as a Service
   template:
