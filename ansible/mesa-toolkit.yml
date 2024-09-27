@@ -27,6 +27,7 @@
     export DJANGO_SUPERUSER_PASSWORD={{ mesa_user_password }}
     export DJANGO_SUPERUSER_EMAIL=vulnerability@cisa.dhs.gov
     python manage.py createsuperuser --username {{ mesa_user_name }} --no-input
+    python manage.py collectstatic --noinput
 
 - name: Disable DEBUG Mode
   lineinfile:
