@@ -58,7 +58,7 @@ variable "output_directory" {
 }
 
 source "vmware-iso" "base-deb" {
-  iso_url = "https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-12.6.0-amd64-netinst.iso"
+  iso_url = "https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-12.7.0-amd64-netinst.iso"
   iso_checksum = "file:https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/SHA256SUMS"
   shutdown_command = "echo '${var.vm_password}' | sudo -S shutdown -P now"
   output_directory = "${var.output_directory}"
