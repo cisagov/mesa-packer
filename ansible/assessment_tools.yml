@@ -26,20 +26,6 @@
         git_token: "{{ lookup('env', 'GIT_PAT') }}"
         force: yes
 
-    # Apt package list
-    # packages:
-      # - nmap
-      # - 7zip
-      # - zip
-      # - unzip
-      # - tar
-      # - ufw
-      # - neo4j
-      # - python3.11-venv
-      # - chromium
-      # - jq
-      # - golang-go
-
   tasks:
 
     - name: Update hosts file
@@ -163,3 +149,17 @@
         echo "termcapinfo xterm* ti@:te@" >> ~/.screenrc
       args:
         creates: "/opt/op-log/"
+
+  handlers:
+    - name: restart nginx
+      systemd:
+        name: nginx
+        state: restarted
+      become: yes
+
+    - name: restart mesa
+      systemd:
+        daemon_reload: yes
+        name: mesa
+        state: restarted
+      become: yes
