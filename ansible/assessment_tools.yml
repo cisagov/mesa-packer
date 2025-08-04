@@ -13,7 +13,7 @@
       # Git Only
       - name: "MESA-Toolkit"
         repo: "github.com/cisagov/mesa-toolkit"
-        version: "main"
+        version: "v2.0.0"
         # Get access token from vault and pass to git module
         git_user: "{{ lookup('env', 'GIT_USER') }}"
         git_token: "{{ lookup('env', 'GIT_PAT') }}"
@@ -21,7 +21,7 @@
 
       - name: "MESA-GUI"
         repo: "github.com/cisagov/mesa-gui"
-        version: "develop"
+        version: "v1.0.0"
         git_user: "{{ lookup('env', 'GIT_USER') }}"
         git_token: "{{ lookup('env', 'GIT_PAT') }}"
         force: yes
